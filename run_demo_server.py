@@ -20,14 +20,14 @@ logger.setLevel(logging.INFO)
 @functools.lru_cache(maxsize=1)
 def get_host_info():
     ret = {}
-    with open('/proc/cpuinfo') as f:
-        ret['cpuinfo'] = f.read()
-
-    with open('/proc/meminfo') as f:
-        ret['meminfo'] = f.read()
-
-    with open('/proc/loadavg') as f:
-        ret['loadavg'] = f.read()
+    # with open('/proc/cpuinfo') as f:
+    #     ret['cpuinfo'] = f.read()
+    #
+    # with open('/proc/meminfo') as f:
+    #     ret['meminfo'] = f.read()
+    #
+    # with open('/proc/loadavg') as f:
+    #     ret['loadavg'] = f.read()
 
     return ret
 
@@ -49,8 +49,9 @@ def get_predictor(checkpoint_path):
     variable_averages = tf.train.ExponentialMovingAverage(0.997, global_step)
     saver = tf.train.Saver(variable_averages.variables_to_restore())
 
-    sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
-
+    config = tf.ConfigProto(allow_soft_placement=True)
+    config.gpu_options.allow_growth = True
+    sess = tf.Session(config=config)
     ckpt_state = tf.train.get_checkpoint_state(checkpoint_path)
     model_path = os.path.join(checkpoint_path, os.path.basename(ckpt_state.model_checkpoint_path))
     logger.info('Restore from {}'.format(model_path))
@@ -224,4 +225,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
